@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { airDropHelper } from "./helper/airDrop.helper";
 
 const App = () => {
   const [walletConnected, setWalletConnected] = useState(false);
@@ -41,10 +42,21 @@ const App = () => {
           <strong>Public Key:</strong> {provider.publicKey.toString()}
         </p>
       )}
-
       <button onClick={walletConnectionHelper} disabled={loading}>
         {!walletConnected ? "Connect Wallet" : "Disconnect Wallet"}
       </button>
+
+      {walletConnected && (
+        <p>
+          Airdrop 1 SOL into your wallet
+          <button
+            disabled={loading}
+            onClick={() => airDropHelper(setLoading, provider)}
+          >
+            AirDrop SOL{" "}
+          </button>
+        </p>
+      )}
     </div>
   );
 };
