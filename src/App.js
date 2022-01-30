@@ -18,6 +18,7 @@ const App = () => {
   return (
     <div>
       <h1>Create your own token using JavaScript</h1>
+      <span>{loading && <>LOADING...</>}</span>
       {/* Connecting with Phantom Wallet */}
       {walletConnected && (
         <p>
