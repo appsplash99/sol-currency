@@ -1,7 +1,9 @@
 import React, { useState } from "react";
 import { airDropHelper } from "./helper/airDrop.helper";
+import { capSupplyHelper } from "./helper/capSupply.helper";
 import { initialMintHelper } from "./helper/initialMint.helper";
 import { mintAgainHelper } from "./helper/mintAgain.helper";
+import { transferTokenHelper } from "./helper/transferToken.helper";
 import { walletConnectionHelper } from "./helper/walletConnection.helper";
 
 const App = () => {
@@ -19,11 +21,12 @@ const App = () => {
     <div>
       <h1>Create your own token using JavaScript</h1>
       <span>{loading && <>LOADING...</>}</span>
+
       {/* Connecting with Phantom Wallet */}
       {walletConnected && (
-        <p>
+        <li>
           <strong>Public Key:</strong> {provider.publicKey.toString()}
-        </p>
+        </li>
       )}
       <button
         onClick={() =>
@@ -37,57 +40,98 @@ const App = () => {
       >
         {!walletConnected ? "Connect Wallet" : "Disconnect Wallet"}
       </button>
-      {/* AIR_DROP yourself some SOL */}
-      {walletConnected && (
-        <p>
-          Airdrop 1 SOL into your wallet{" "}
-          <button
-            disabled={loading}
-            onClick={() => airDropHelper(setLoading, provider)}
-          >
-            AirDrop SOL{" "}
-          </button>
-        </p>
-      )}
-      {/* Minting your Tokens */}
-      {walletConnected && (
-        <p>
-          Create your own token
-          <button
-            disabled={loading}
-            onClick={() =>
-              initialMintHelper(
-                provider,
-                setLoading,
-                setIsTokenCreated,
-                setCreatedTokenPublicKey,
-                setMintingWalletSecretKey
-              )
-            }
-          >
-            Initial Mint{" "}
-          </button>
-        </p>
-      )}
-      {/* Minting more tokens */}
-      <div>
-        <li>
-          Mint More 100 tokens:{" "}
-          <button
-            disabled={loading || supplyCapped}
-            onClick={() =>
-              mintAgainHelper(
-                provider,
-                setLoading,
-                createdTokenPublicKey,
-                mintingWalletSecretKey
-              )
-            }
-          >
-            Mint Again
-          </button>
-        </li>
-      </div>
+      <ul>
+        {/* AIR_DROP yourself some SOL */}
+        {walletConnected && (
+          <li>
+            Airdrop 1 SOL into your wallet{" "}
+            <button
+              disabled={loading}
+              onClick={() => airDropHelper(setLoading, provider)}
+            >
+              AirDrop SOL{" "}
+            </button>
+          </li>
+        )}
+        {/* Minting your Tokens */}
+        {walletConnected && (
+          <li>
+            Create your own token
+            <button
+              disabled={loading}
+              onClick={() =>
+                initialMintHelper(
+                  provider,
+                  setLoading,
+                  setIsTokenCreated,
+                  setCreatedTokenPublicKey,
+                  setMintingWalletSecretKey
+                )
+              }
+            >
+              Initial Mint{" "}
+            </button>
+          </li>
+        )}
+        {/* Minting more tokens */}
+        {walletConnected && (
+          <li>
+            Mint More 100 tokens:{"   "}
+            <button
+              disabled={loading || supplyCapped}
+              onClick={() =>
+                mintAgainHelper(
+                  provider,
+                  setLoading,
+                  createdTokenPublicKey,
+                  mintingWalletSecretKey
+                )
+              }
+            >
+              Mint Again
+            </button>
+          </li>
+        )}
+        {/* Transferring tokens to your friends */}
+        {walletConnected && (
+          <li>
+            Transfer Token to Friends:{"   "}
+            <button
+              disabled={loading}
+              onClick={() => {
+                transferTokenHelper(
+                  provider,
+                  setLoading,
+                  createdTokenPublicKey,
+                  mintingWalletSecretKey
+                );
+              }}
+            >
+              Transfer 10 Tokens
+            </button>
+          </li>
+        )}
+        {/* Capping Token Supply */}
+        {walletConnected && (
+          <li>
+            Cap Token Supply:{"   "}
+            <button
+              disabled={loading}
+              onClick={() =>
+                capSupplyHelper(
+                  provider,
+                  setLoading,
+                  setSupplyCapped,
+                  createdTokenPublicKey,
+                  mintingWalletSecretKey
+                )
+              }
+            >
+              Cap Token Supply
+            </button>
+          </li>
+        )}
+      </ul>
     </div>
   );
 };
