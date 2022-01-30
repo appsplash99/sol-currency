@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import { airDropHelper } from "./helper/airDrop.helper";
 import { initialMintHelper } from "./helper/initialMint.helper";
+import { mintAgainHelper } from "./helper/mintAgain.helper";
 import { walletConnectionHelper } from "./helper/walletConnection.helper";
 
 const App = () => {
@@ -11,6 +12,8 @@ const App = () => {
   const [isTokenCreated, setIsTokenCreated] = useState(false);
   const [createdTokenPublicKey, setCreatedTokenPublicKey] = useState(null);
   const [mintingWalletSecretKey, setMintingWalletSecretKey] = useState(null);
+
+  const [supplyCapped, setSupplyCapped] = useState(false);
 
   return (
     <div>
@@ -65,6 +68,25 @@ const App = () => {
           </button>
         </p>
       )}
+      {/* Minting more tokens */}
+      <div>
+        <li>
+          Mint More 100 tokens:{" "}
+          <button
+            disabled={loading || supplyCapped}
+            onClick={() =>
+              mintAgainHelper(
+                provider,
+                setLoading,
+                createdTokenPublicKey,
+                mintingWalletSecretKey
+              )
+            }
+          >
+            Mint Again
+          </button>
+        </li>
+      </div>
     </div>
   );
 };

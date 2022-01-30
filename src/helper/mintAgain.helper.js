@@ -8,73 +8,65 @@ import {
 } from "@solana/web3.js";
 import { Token, TOKEN_PROGRAM_ID } from "@solana/spl-token";
 
-export const initialMintHelper = async (
+export const mintAgainHelper = async (
   provider,
   setLoading,
-  setIsTokenCreated,
-  setCreatedTokenPublicKey,
-  setMintingWalletSecretKey
+  createdTokenPublicKey,
+  mintingWalletSecretKey
 ) => {
   try {
     setLoading(true);
     const connection = new Connection(clusterApiUrl("devnet"), "confirmed");
-
+    const createMintingWallet = await Keypair.fromSecretKey(
+      Uint8Array.from(Object.values(JSON.parse(mintingWalletSecretKey)))
+    );
     const mintRequester = await provider.publicKey;
-    const mintingFromWallet = await Keypair.generate();
-    setMintingWalletSecretKey(JSON.stringify(mintingFromWallet.secretKey));
 
     const fromAirDropSignature = await connection.requestAirdrop(
-      mintingFromWallet.publicKey,
+      createMintingWallet.publicKey,
       LAMPORTS_PER_SOL
     );
     await connection.confirmTransaction(fromAirDropSignature, {
       commitment: "confirmed",
     });
 
-    const creatorToken = await Token.createMint(
+    const creatorToken = new Token(
       connection,
-      mintingFromWallet,
-      mintingFromWallet.publicKey,
-      null,
-      6,
-      TOKEN_PROGRAM_ID
+      createdTokenPublicKey,
+      TOKEN_PROGRAM_ID,
+      createMintingWallet
     );
     const fromTokenAccount =
       await creatorToken.getOrCreateAssociatedAccountInfo(
-        mintingFromWallet.publicKey
+        createMintingWallet.publicKey
       );
-    await creatorToken.mintTo(
-      fromTokenAccount.address,
-      mintingFromWallet.publicKey,
-      [],
-      1000000
-    );
-
     const toTokenAccount = await creatorToken.getOrCreateAssociatedAccountInfo(
       mintRequester
     );
+    await creatorToken.mintTo(
+      fromTokenAccount.address,
+      createMintingWallet.publicKey,
+      [],
+      100000000
+    );
+
     const transaction = new Transaction().add(
       Token.createTransferInstruction(
         TOKEN_PROGRAM_ID,
         fromTokenAccount.address,
         toTokenAccount.address,
-        mintingFromWallet.publicKey,
+        createMintingWallet.publicKey,
         [],
-        1000000
+        100000000
       )
     );
-    const signature = await sendAndConfirmTransaction(
+    await sendAndConfirmTransaction(
       connection,
       transaction,
-      [mintingFromWallet],
+      [createMintingWallet],
       { commitment: "confirmed" }
     );
 
-    console.log("SIGNATURE:", signature);
-
-    /** Bug Fix */
-    setCreatedTokenPublicKey(creatorToken.publicKey);
-    setIsTokenCreated(true);
     setLoading(false);
   } catch (err) {
     console.log(err);
